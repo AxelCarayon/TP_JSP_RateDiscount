@@ -8,6 +8,7 @@ package controllers;
 import SQL.DiscountEntity;
 import SQL.ExtendedDAO;
 import java.io.IOException;
+import java.sql.SQLException;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -36,9 +37,18 @@ public class RateDiscount extends HttpServlet {
      * @throws IOException if an I/O error occurs
      */
     protected void processRequest(HttpServletRequest request, HttpServletResponse response)
-            throws ServletException, IOException {
+            throws ServletException, IOException, SQLException {
         ExtendedDAO dao = new ExtendedDAO(DataSourceFactory.getDataSource());
+        String code = request.getParameter("code");
+        String action = "";
+        action += request.getParameter("ACTION");
+        System.out.println(action);
+        
         try {
+            if (code!=null & action.equals("ADD")){
+                Double rate = Double.parseDouble(request.getParameter("rate"));
+                dao.insertDiscount(new DiscountEntity(code,rate));
+            }
             List<DiscountEntity> discounts = dao.existingDiscountCode();
             request.setAttribute("discounts",discounts);
         } catch (DAOException ex) {
@@ -62,10 +72,11 @@ public class RateDiscount extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        //TODO
-        String rate = request.getParameter("rate");
-        String code = request.getParameter("code");
-        processRequest(request, response);
+        try {
+            processRequest(request, response);
+        } catch (SQLException ex) {
+            Logger.getLogger(RateDiscount.class.getName()).log(Level.SEVERE, null, ex);
+        }
     }
 
     /**
@@ -79,7 +90,11 @@ public class RateDiscount extends HttpServlet {
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        processRequest(request, response);
+        try {
+            processRequest(request, response);
+        } catch (SQLException ex) {
+            Logger.getLogger(RateDiscount.class.getName()).log(Level.SEVERE, null, ex);
+        }
     }
 
     /**

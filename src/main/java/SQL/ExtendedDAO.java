@@ -40,22 +40,21 @@ public class ExtendedDAO extends DAO{
 		return result;
 	}
     
-    public int addCustomer(int customerId) throws DAOException {
+    public void insertDiscount(DiscountEntity discount) throws SQLException {
 
 		// Une requête SQL paramétrée
-		String sql = "DELETE FROM CUSTOMER WHERE CUSTOMER_ID = ?";
+		String sql = "INSERT INTO DISCOUNT_CODE VALUES(?, ?)";
 		try (   Connection connection = myDataSource.getConnection();
 			PreparedStatement stmt = connection.prepareStatement(sql)
                 ) {
                         // Définir la valeur du paramètre
-			stmt.setInt(1, customerId);
-			
-			return stmt.executeUpdate();
+			stmt.setString(1, discount.getCode());
+			stmt.setDouble(2, discount.getRate());
 
-		}  catch (SQLException ex) {
-			Logger.getLogger("DAO").log(Level.SEVERE, null, ex);
-			throw new DAOException(ex.getMessage());
+			stmt.executeUpdate();
+
 		}
+		
 	}
     
     
