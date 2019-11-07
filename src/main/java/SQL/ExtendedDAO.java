@@ -57,6 +57,23 @@ public class ExtendedDAO extends DAO{
 		
 	}
     
+    public void deleteDiscount(String code) throws DAOException{
+        
+        String sql = "DELETE FROM DISCOUNT_CODE WHERE DISCOUNT_CODE = ?";
+		try (   Connection connection = myDataSource.getConnection();
+			PreparedStatement stmt = connection.prepareStatement(sql)
+                ) {
+                        // Définir la valeur du paramètre
+			stmt.setString(1, code);
+                        stmt.executeUpdate();
+
+		}  catch (SQLException ex) {
+			Logger.getLogger("DAO").log(Level.SEVERE, null, ex);
+			throw new DAOException(ex.getMessage());
+		}
+        
+    }
+    
     
     /*
     Inutile car contrainte d'intégrité

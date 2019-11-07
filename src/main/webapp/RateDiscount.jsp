@@ -52,7 +52,7 @@
 			<input type="submit" value="Ajouter">
 		</form>
 		
-		<div><h4></h4></div>
+		<div><h4>${error}</h4></div>
 		
 		<div class="table">
 			<div class="thead"><div class="td">Code</div><div class="td">Taux</div><div class="td">Action</div></div>

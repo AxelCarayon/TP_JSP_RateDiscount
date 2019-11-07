@@ -41,16 +41,35 @@ public class RateDiscount extends HttpServlet {
         ExtendedDAO dao = new ExtendedDAO(DataSourceFactory.getDataSource());
         String code = request.getParameter("code");
         String action = "";
-        action += request.getParameter("ACTION");
-        System.out.println(action);
+        String error = "";
+        action += request.getParameter("action");
         
         try {
-            if (code!=null & action.equals("ADD")){
-                Double rate = Double.parseDouble(request.getParameter("rate"));
-                dao.insertDiscount(new DiscountEntity(code,rate));
+            try{
+                if (action.equals("ADD")){
+                    Double rate = Double.parseDouble(request.getParameter("rate"));
+                    dao.insertDiscount(new DiscountEntity(code,rate));
+                    System.out.println("Rabais ajouté");
+                }
+            }catch(Exception e){
+                if (request.getParameter("rate").equals("") || code.equals("")){
+                    error = "Le code ou le taux n'as pas été renseigné.";
+                }
+                else{
+                    error = "Impossible d'ajouter la réduction, elle existe déjà.";
+                }
+            }
+            try{
+            if (action.equals("DELETE")){
+                dao.deleteDiscount(code);
+                System.out.println("Rabais supprimé");
+            }
+            }catch(Exception e){
+                error = "Impossible de supprimer la réduction, elle est utilisée ailleurs.";
             }
             List<DiscountEntity> discounts = dao.existingDiscountCode();
             request.setAttribute("discounts",discounts);
+            request.setAttribute("error",error);
         } catch (DAOException ex) {
             Logger.getLogger(RateDiscount.class.getName()).log(Level.SEVERE, null, ex);
         }
