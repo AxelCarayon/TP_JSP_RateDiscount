@@ -40,33 +40,25 @@ public class RateDiscount extends HttpServlet {
             throws ServletException, IOException, SQLException {
         ExtendedDAO dao = new ExtendedDAO(DataSourceFactory.getDataSource());
         String code = request.getParameter("code");
+        Double rate;
+        try{
+            rate = Double.parseDouble(request.getParameter("rate"));
+        }catch(Exception e){
+            rate = null;
+        }
         String action = "";
         String error = "";
         action += request.getParameter("action");
         
         try {
-            try{
-                if (action.equals("ADD")){
-                    Double rate = Double.parseDouble(request.getParameter("rate"));
-                    dao.insertDiscount(new DiscountEntity(code,rate));
-                    System.out.println("Rabais ajouté");
-                }
-            }catch(Exception e){
-                if (request.getParameter("rate").equals("") || code.equals("")){
-                    error = "Le code ou le taux n'as pas été renseigné.";
-                }
-                else{
-                    error = "Impossible d'ajouter la réduction, elle existe déjà.";
-                }
+            
+            if (action.equals("ADD")){
+               error = this.addDiscount(dao,code,rate);
             }
-            try{
             if (action.equals("DELETE")){
-                dao.deleteDiscount(code);
-                System.out.println("Rabais supprimé");
+                error = this.deleteDiscount(dao,code);
             }
-            }catch(Exception e){
-                error = "Impossible de supprimer la réduction, elle est utilisée ailleurs.";
-            }
+                
             List<DiscountEntity> discounts = dao.existingDiscountCode();
             request.setAttribute("discounts",discounts);
             request.setAttribute("error",error);
@@ -77,6 +69,36 @@ public class RateDiscount extends HttpServlet {
         
         response.setContentType("text/html;charset=UTF-8");
         request.getRequestDispatcher(jspView).forward(request, response);
+    }
+    
+    /*
+    Essaie de supprimer la réduction, renvoie un string vide si l'opération est un succès, 
+    renvoie le message d'erreur sinon.
+    */
+    private String deleteDiscount(ExtendedDAO dao, String code){
+        try{
+            dao.deleteDiscount(code);
+            return "";
+            }catch(Exception e){
+                return "Impossible de supprimer la réduction, elle est utilisée ailleurs.";
+            }
+    }
+    
+    /*
+    Essaie d'ajouter la réduction, renvoie un string vide si l'opération est un succès, 
+    renvoie le message d'erreur sinon.
+    */
+    private String addDiscount(ExtendedDAO dao,String code, Double rate){
+        try{
+                if (code.equals("") || rate==null){
+                    return "Le code ou le taux n'as pas été renseigné.";
+                }
+                dao.insertDiscount(new DiscountEntity(code,rate));
+                return "";
+            }catch(Exception e){
+                return "Impossible d'ajouter la réduction, elle existe déjà.";
+            }
+        
     }
 
     // <editor-fold defaultstate="collapsed" desc="HttpServlet methods. Click on the + sign on the left to edit the code.">
